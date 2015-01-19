@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="/favicon.ico"/>
+
+    <title>RoboRIO Web SmartDashboard</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap-theme.min.css">
+
+    <!-- Custom styles for this template -->
+    <link href="/dashboard.css" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">RoboRIO Web SmartDashboard</a>
+        </div>
+        <img src="/FIRSTvert_Reversed.gif" width="50" style="margin-left: 15px; margin-right: 15px;">
+      </div>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <p class="yeti-version"></p>
+          <ul class="nav nav-sidebar">
+            <li><a class="navbar-link" href="#">Do Barrel Roll</a></li>
+            <li><a class="navbar-link" href="#">Unleash Magic</a></li>
+          </ul>
+        </div>
+
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main container-fluid">
+          <div class="row">
+              <div id="networktables-container" class="col-md-6">
+                  <div id="networktables" class="panel panel-success">
+                      <div class="panel-heading">
+                          <h2>Network Tables</h2>
+                      </div>
+                      <div class="panel-body">
+                          <p>INSERT DATA HERE!</p>
+                      </div>
+                  </div>
+              </div>
+              <div id="livewindow-container" class="col-md-6">
+                  <div id="livewindow" class="panel panel-info">
+                      <div class="panel-heading">
+                          <h2>Live Window</h2>
+                      </div>
+                      <div class="panel-body">
+                          <p>INSERT DATA HERE!</p>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          <div class="netconsole-container col-md-12">
+              <div class="panel console-panel panel-default">
+                  <div class="panel-heading">
+                      <h2>Netconsole Output</h2>
+                  </div>
+                  <div id="netconsole-block" class="panel-body">
+                      <p id="netconsole-data">
+                      </p>
+                  </div>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/jquery.min.js"></script>
+    <script src="/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/script.js"></script>
+  </body>
+</html>
