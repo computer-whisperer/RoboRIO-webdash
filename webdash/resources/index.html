@@ -66,6 +66,8 @@
               <div class="panel console-panel panel-default">
                   <div class="panel-heading">
                       <h2>Netconsole Output</h2>
+                      <p style="float: right;">Status: <span id="netconsole-status" class="label label-danger">Disconnected</span></p>
+                      <p><a href="/netconsole_dump" target="_blank">Download recorded logs.</a></p>
                   </div>
                   <div id="netconsole-block" class="panel-body">
                       <p id="netconsole-data">
@@ -82,6 +84,6 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="/jquery.min.js"></script>
     <script src="/bootstrap/js/bootstrap.min.js"></script>
-    <script src="/script.js"></script>
+    <script src="/netconsole.js"></script>
   </body>
 </html>

@@ -115,3 +115,11 @@ body {
  overflow-y: auto;
  height: 500px;
 }
+
+#netconsole-data .netconsole-status-green{
+ color: green;
+}
+
+#netconsole-data .netconsole-status-red{
+ color: red;
+}

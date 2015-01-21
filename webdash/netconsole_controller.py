@@ -9,13 +9,18 @@ from queue import Queue, Empty
 UDP_IN_PORT=6666
 UDP_OUT_PORT=6668
 
+received_logs = list()
+log_update_limit = 50
+
 @asyncio.coroutine
 def netconsole_websocket(request):
-    print("Doing something!")
-
     #Setup websocket
     ws = web.WebSocketResponse()
     ws.start(request)
+
+    #Send previous logs
+    for log in received_logs[:min(len(received_logs), log_update_limit)]:
+        ws.send_str(log)
 
     #set up receiving socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
@@ -55,10 +60,12 @@ def netconsole_websocket(request):
     stdin_reader.start()
     sock_reader.start()
 
+    print("Netconsole Updates WebSocket initialized.")
+
     #main loop
     while True:
         try:
-            msg = sock_queue.get_nowait()
+            msg = str(sock_queue.get_nowait(), 'utf-8')
 
         except Empty:
             pass # no output
@@ -66,9 +73,16 @@ def netconsole_websocket(request):
         else:
             #Send msg to the socket
             try:
-                ws.send_str(str(msg, 'utf-8'))
+                ws.send_str(msg)
+                received_logs.append(msg)
             except web.WSClientDisconnectedError as exc:
                 print(exc.code, exc.message)
                 return ws
 
         yield from asyncio.sleep(0.05)
+
+@asyncio.coroutine
+def netconsole_log_dump(request):
+    print("Dumping logs to request.")
+    data = "\n".join(received_logs)
+    return web.Response(body=data.encode('utf-8'))

@@ -1,9 +1,11 @@
 #/usr/bin/python3
 import asyncio
-import netconsole_controller
+from os.path import abspath, dirname, join
+
 from aiohttp import web
 
-from os.path import abspath, dirname, join
+from webdash import netconsole_controller
+from webdash import networktables_controller
 
 ENABLE_NETWORKTABLES = True
 
@@ -24,18 +26,17 @@ if ENABLE_NETCONSOLE:
         ENABLE_NETCONSOLE = False
 
 @asyncio.coroutine
-def data(request):
-    return web.Response(body=b"Hello, world")
-
-@asyncio.coroutine
 def forward_request(request):
     return web.HTTPFound("/index.html")
 
 def main():
+    networktables_controller.setup_networktables("10.1.0.101")
+
     file_root = join(abspath(dirname(__file__)), "resources")
 
     app = web.Application()
     app.router.add_route("GET", "/netconsole", netconsole_controller.netconsole_websocket)
+    app.router.add_route("GET", "/netconsole_dump", netconsole_controller.netconsole_log_dump)
     app.router.add_route("GET", "/", forward_request)
     app.router.add_static("/", file_root)
 
