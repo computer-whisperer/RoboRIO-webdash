@@ -45,9 +45,23 @@
                   <div id="networktables" class="panel panel-success">
                       <div class="panel-heading">
                           <h2>Network Tables</h2>
+                          <p style="float: right;">Status: <span id="networktables-status" class="label label-danger">Disconnected</span></p>
+                          <br/>
                       </div>
                       <div class="panel-body">
-                          <p>INSERT DATA HERE!</p>
+                          <div id="networktables-block">
+                          <table id="networktables-table" class="table table-striped">
+                              <thead>
+                                <tr>
+                                    <td>Entry Name</td>
+                                    <td>Entry Value</td>
+                                </tr>
+                              </thead>
+                              <tbody>
+
+                              </tbody>
+                          </table>
+                          </div>
                       </div>
                   </div>
               </div>
@@ -69,7 +83,7 @@
                       <p style="float: right;">Status: <span id="netconsole-status" class="label label-danger">Disconnected</span></p>
                       <p><a href="/netconsole_dump" target="_blank">Download recorded logs.</a></p>
                   </div>
-                  <div id="netconsole-block" class="panel-body">
+                  <div id="netconsole-block" class="panel-body" style="clear: right;">
                       <p id="netconsole-data">
                       </p>
                   </div>
@@ -85,5 +99,6 @@
     <script src="/jquery.min.js"></script>
     <script src="/bootstrap/js/bootstrap.min.js"></script>
     <script src="/netconsole.js"></script>
+    <script src="/networktables.js"></script>
   </body>
 </html>

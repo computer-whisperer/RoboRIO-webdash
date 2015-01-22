@@ -30,11 +30,10 @@ def forward_request(request):
     return web.HTTPFound("/index.html")
 
 def main():
-    networktables_controller.setup_networktables("10.1.0.101")
-
     file_root = join(abspath(dirname(__file__)), "resources")
 
     app = web.Application()
+    app.router.add_route("GET", "/networktables", networktables_controller.networktables_websocket)
     app.router.add_route("GET", "/netconsole", netconsole_controller.netconsole_websocket)
     app.router.add_route("GET", "/netconsole_dump", netconsole_controller.netconsole_log_dump)
     app.router.add_route("GET", "/", forward_request)

@@ -123,3 +123,8 @@ body {
 #netconsole-data .netconsole-status-red{
  color: red;
 }
+
+#networktables-block{
+ overflow-y: auto;
+ height: 500px;
+}

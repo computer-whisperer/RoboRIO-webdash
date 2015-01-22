@@ -76,6 +76,7 @@ def netconsole_websocket(request):
                 ws.send_str(msg)
                 received_logs.append(msg)
             except web.WSClientDisconnectedError as exc:
+                print("NC Websocket Disconnected")
                 print(exc.code, exc.message)
                 return ws
 

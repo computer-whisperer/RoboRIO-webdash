@@ -1,34 +1,41 @@
 from networktables import NetworkTable
 import asyncio
+import json
 from aiohttp import web
+from threading import RLock
 
 update_wait = .1
-ip_address = "10.1.0.101"
+ip_address = "10.1.0.3"
 
 initialized_networktables = False
 
-tables = dict()
-root_table = None
+table_data = None
+table_data_lock = RLock()
+table_object = None
 
 connections = list()
 
 def table_listener(source, key, value, isNew):
-    if source not in tables:
-        tables[source] = {}
-    tables[source][key] = value
+    push_table_val(key, value)
 
-    for connection in connections:
-        connection.pending_updates.append({})
+def push_table_val(key, value):
+    with table_data_lock:
+        table_data[key] = value
 
+        for connection in connections:
+            connection["pending_updates"][key] = value
 
 def setup_networktables(ip):
+    global table_object, table_data, initialized_networktables
     if initialized_networktables:
         return
     NetworkTable.setIPAddress(ip)
     NetworkTable.setClientMode()
     NetworkTable.initialize()
-    root_table = NetworkTable.getTable("SmartDashboard")
-    root_table.addTableListener(table_listener, True)
+    table_object = NetworkTable.getTable("SmartDashboard")
+    table_object.addTableListener(table_listener, True)
+    table_data = dict()
+    initialized_networktables = True
 
 @asyncio.coroutine
 def networktables_websocket(request):
@@ -36,22 +43,44 @@ def networktables_websocket(request):
     ws = web.WebSocketResponse()
     ws.start(request)
 
-
     #Setup networktables
     setup_networktables(ip_address)
 
-    connections.append({"socket": ws, "pending_updates": list()})
+    #Setup connection dict
+    con_id = len(connections)
+    with table_data_lock:
+        connection = {"socket": ws, "pending_updates": table_data.copy()}
+        connections.append(connection)
+    print("NT Websocket {} Connected".format(con_id))
 
-    last_data = dict()
+    #Start listener coroutine
+    asyncio.async(networktables_websocket_listner(ws))
+
     #Update periodically until the websocket is closed.
+    try:
+        while True:
+            if len(connection["pending_updates"]) > 0:
+                string_data = json.dumps(connection["pending_updates"])
+                print("Sending " + string_data)
+                ws.send_str(string_data)
+                connection["pending_updates"] = dict()
+            if ws.closing:
+                break
+            yield from asyncio.sleep(update_wait)
+    except web.WSClientDisconnectedError:
+        pass
 
-    while True:
-        try:
-            #Send updates
-            pass
-        except web.WSClientDisconnectedError:
-            return ws
-        yield from asyncio.sleep(.1)
+    print("NT Websocket {} Disconnected".format(con_id))
+    with table_data_lock:
+        connections.remove(connection)
+    return ws
 
-
-
+@asyncio.coroutine
+def networktables_websocket_listner(ws):
+    try:
+        while True:
+            jdata = yield from ws.receive_str()
+            data = json.loads(jdata)
+            table_object.pushData(data["name"], data["value"])
+    except web.WSClientDisconnectedError:
+        pass
