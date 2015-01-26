@@ -4,6 +4,7 @@ import socket
 import threading
 import atexit
 import sys
+import time
 from queue import Queue, Empty
 
 UDP_IN_PORT=6666
@@ -13,15 +14,7 @@ received_logs = list()
 log_update_limit = 50
 
 @asyncio.coroutine
-def netconsole_websocket(request):
-    #Setup websocket
-    ws = web.WebSocketResponse()
-    ws.start(request)
-
-    #Send previous logs
-    for log in received_logs[:min(len(received_logs), log_update_limit)]:
-        ws.send_str(log)
-
+def netconsole_monitor():
     #set up receiving socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -60,12 +53,10 @@ def netconsole_websocket(request):
     stdin_reader.start()
     sock_reader.start()
 
-    print("Netconsole Updates WebSocket initialized.")
-
     #main loop
     while True:
         try:
-            msg = str(sock_queue.get_nowait(), 'utf-8')
+            msg = sock_queue.get_nowait()
 
         except Empty:
             pass # no output
@@ -73,14 +64,35 @@ def netconsole_websocket(request):
         else:
             #Send msg to the socket
             try:
-                ws.send_str(msg)
-                received_logs.append(msg)
+                process_log(msg)
             except web.WSClientDisconnectedError as exc:
-                print("NC Websocket Disconnected")
                 print(exc.code, exc.message)
-                return ws
-
+                return
         yield from asyncio.sleep(0.05)
+
+def process_log(message):
+    log_data = {"message": message, "timestamp": time.monotonic()}
+    received_logs.append(log_data)
+    for websocket in websocket_connections[:]:
+        try:
+            websocket.send_str(message)
+        except web.WSClientDisconnectedError:
+            websocket.close()
+            websocket_connections.remove(websocket)
+
+websocket_connections = list()
+
+@asyncio.coroutine
+def netconsole_websocket(request):
+
+    wc = web.WebSocketResponse()
+    wc.start(request)
+    wc_id = len(websocket_connections)
+    websocket_connections.append(wc)
+    print("NC Websocket {} Connected".format(wc_id))
+    yield from wc.wait_closed()
+    print("NC Websocket {} Disonnected".format(wc_id))
+    return wc
 
 @asyncio.coroutine
 def netconsole_log_dump(request):

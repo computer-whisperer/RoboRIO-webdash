@@ -5,7 +5,7 @@ from aiohttp import web
 from threading import RLock
 
 update_wait = .1
-ip_address = "10.1.0.3"
+ip_address = "127.0.0.1"
 
 initialized_networktables = False
 
@@ -16,24 +16,29 @@ table_object = None
 connections = list()
 
 def table_listener(source, key, value, isNew):
-    push_table_val(key, value)
+    print(source)
+    print(key)
+    print(value)
+    push_table_val(source, key, value)
 
-def push_table_val(key, value):
+def push_table_val(source, key, value):
     with table_data_lock:
-        table_data[key] = value
+        if source not in table_data:
+            table_data[source] = dict()
+        table_data[source][key] = value
 
         for connection in connections:
-            connection["pending_updates"][key] = value
+            connection["pending_updates"][source][key] = value
 
-def setup_networktables(ip):
+def setup_networktables(ip=ip_address):
     global table_object, table_data, initialized_networktables
     if initialized_networktables:
         return
     NetworkTable.setIPAddress(ip)
     NetworkTable.setClientMode()
     NetworkTable.initialize()
-    table_object = NetworkTable.getTable("SmartDashboard")
-    table_object.addTableListener(table_listener, True)
+    table_object = NetworkTable.getTable("")
+    table_object.addSubTableListener(table_listener)
     table_data = dict()
     initialized_networktables = True
 
@@ -54,7 +59,7 @@ def networktables_websocket(request):
     print("NT Websocket {} Connected".format(con_id))
 
     #Start listener coroutine
-    asyncio.async(networktables_websocket_listner(ws))
+    asyncio.async(networktables_websocket_listener(ws))
 
     #Update periodically until the websocket is closed.
     try:
@@ -76,7 +81,7 @@ def networktables_websocket(request):
     return ws
 
 @asyncio.coroutine
-def networktables_websocket_listner(ws):
+def networktables_websocket_listener(ws):
     try:
         while True:
             jdata = yield from ws.receive_str()

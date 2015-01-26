@@ -7,31 +7,14 @@ from aiohttp import web
 from webdash import netconsole_controller
 from webdash import networktables_controller
 
-ENABLE_NETWORKTABLES = True
-
-ENABLE_NETCONSOLE = True
-
-ENABLE_LIVEWINDOW = True
-
-if ENABLE_NETWORKTABLES:
-    try:
-        import networktables
-    except ImportError:
-        ENABLE_NETWORKTABLES = False
-
-if ENABLE_NETCONSOLE:
-    try:
-        import netconsole
-    except ImportError:
-        ENABLE_NETCONSOLE = False
-
 @asyncio.coroutine
 def forward_request(request):
     return web.HTTPFound("/index.html")
 
 def main():
     file_root = join(abspath(dirname(__file__)), "resources")
-
+    asyncio.async(netconsole_controller.netconsole_monitor())
+    networktables_controller.setup_networktables()
     app = web.Application()
     app.router.add_route("GET", "/networktables", networktables_controller.networktables_websocket)
     app.router.add_route("GET", "/netconsole", netconsole_controller.netconsole_websocket)
