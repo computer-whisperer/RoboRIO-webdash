@@ -3,6 +3,10 @@ import asyncio
 import json
 from aiohttp import web
 from threading import RLock
+import time
+
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 update_wait = .1
 ip_address = "127.0.0.1"
@@ -11,14 +15,18 @@ initialized_networktables = False
 
 table_data = None
 table_data_lock = RLock()
-table_object = None
+root_table = None
 
 connections = list()
+tagged_tables = list()
 
-def table_listener(source, key, value, isNew):
-    print(source)
-    print(key)
-    print(value)
+def subtable_listner(source, key, value, isNew):
+    watch_table(value.path)
+
+def val_listener(source, key, value, isNew):
+    print("Source value:'{}'".format(source))
+    print("Key value:'{}'".format(key))
+    print("Value value:'{}'".format(value))
     push_table_val(source, key, value)
 
 def push_table_val(source, key, value):
@@ -30,15 +38,25 @@ def push_table_val(source, key, value):
         for connection in connections:
             connection["pending_updates"][source][key] = value
 
+def watch_table(key):
+    print("Watching Table " + key)
+    with table_data_lock:
+        if key in tagged_tables:
+            return
+        new_table = root_table.getTable(key)
+        new_table.addSubTableListener(subtable_listner)
+        #new_table.addTableListener(val_listener, True)
+
+
 def setup_networktables(ip=ip_address):
-    global table_object, table_data, initialized_networktables
+    global root_table, table_data, initialized_networktables
     if initialized_networktables:
         return
     NetworkTable.setIPAddress(ip)
     NetworkTable.setClientMode()
     NetworkTable.initialize()
-    table_object = NetworkTable.getTable("")
-    table_object.addSubTableListener(table_listener)
+    root_table = NetworkTable.getTable("")
+    root_table.addSubTableListener(subtable_listner)
     table_data = dict()
     initialized_networktables = True
 
@@ -86,6 +104,6 @@ def networktables_websocket_listener(ws):
         while True:
             jdata = yield from ws.receive_str()
             data = json.loads(jdata)
-            table_object.pushData(data["name"], data["value"])
+            root_table.pushData(data["name"], data["value"])
     except web.WSClientDisconnectedError:
         pass
