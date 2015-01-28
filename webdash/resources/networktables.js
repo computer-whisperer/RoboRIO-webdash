@@ -30,20 +30,49 @@ function networktables_close(e){
     setTimeout(start_networktables, 1000)
 }
 
+var root_table = "/SmartDashboard"
+
 var networktables_data = []
 
 function networktables_message(e){
     obj = JSON.parse(e.data)
-    for (i in obj){
-        networktables_data[i] = obj[i]
-    }
+    networktables_data = flatten_object(obj)
     update_networktables_ui()
+}
+
+function networktables_set_table(){
+    root_table = $("#networktables-select").val()
+    update_networktables_ui()
+}
+
+function flatten_object(obj){
+    var result = []
+    for (var key in obj){
+        if (typeof obj[key] == "object"){
+            var subflat = flatten_object(obj[key])
+            for (s in subflat){
+                result["/" + key + s] = subflat[s]
+            }
+        }
+        else{
+            result["/" + key] = obj[key]
+        }
+    }
+    return result
 }
 
 function update_networktables_ui(){
     $("#networktables-table tbody tr").remove()
-    table_order = []
+    //Filter table
+    filtered_data = []
     for (i in networktables_data){
+        if (i.lastIndexOf(root_table, 0) == 0){
+            newname = i.replace(root_table, "")
+            filtered_data[newname] = networktables_data[i]
+        }
+    }
+    table_order = []
+    for (i in filtered_data){
         table_order.push(i)
     }
     table_order.sort()
@@ -51,7 +80,7 @@ function update_networktables_ui(){
     for (i=0; i < table_order.length; i++){
         name = table_order[i]
         html += '<tr><td>' + name +
-                '</td><td>' + networktables_data[name] + '</td></tr>';
+                '</td><td>' + filtered_data[name] + '</td></tr>';
     }
     $("#networktables-table tbody").html(html)
 }

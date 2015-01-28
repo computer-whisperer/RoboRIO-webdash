@@ -3,7 +3,6 @@ import asyncio
 import json
 from aiohttp import web
 from threading import RLock
-import time
 
 import logging
 logging.basicConfig(level=logging.DEBUG)
@@ -21,22 +20,20 @@ connections = list()
 tagged_tables = list()
 
 def subtable_listner(source, key, value, isNew):
-    watch_table(value.path)
-
-def val_listener(source, key, value, isNew):
-    print("Source value:'{}'".format(source))
-    print("Key value:'{}'".format(key))
-    print("Value value:'{}'".format(value))
-    push_table_val(source, key, value)
-
-def push_table_val(source, key, value):
+    print("subTableListener triggered! params: '{}', '{}', '{}', '{}'".format(source, key, value, isNew))
     with table_data_lock:
-        if source not in table_data:
-            table_data[source] = dict()
-        table_data[source][key] = value
+        if source.containsSubTable(key):
+            watch_table(value.path)
+        else:
+            target_ref = table_data
+            for s in source.path.split(NetworkTable.PATH_SEPARATOR):
+                if s == "":
+                    continue
+                elif s not in target_ref:
+                    target_ref[s] = dict()
+                target_ref = target_ref[s]
+            target_ref[key] = source.getValue(key)
 
-        for connection in connections:
-            connection["pending_updates"][source][key] = value
 
 def watch_table(key):
     print("Watching Table " + key)
@@ -79,14 +76,17 @@ def networktables_websocket(request):
     #Start listener coroutine
     asyncio.async(networktables_websocket_listener(ws))
 
+    last_data = dict()
+
     #Update periodically until the websocket is closed.
     try:
         while True:
-            if len(connection["pending_updates"]) > 0:
-                string_data = json.dumps(connection["pending_updates"])
+            updates = dict_delta(last_data, table_data)
+            if len(updates) > 0:
+                string_data = json.dumps(updates)
                 print("Sending " + string_data)
                 ws.send_str(string_data)
-                connection["pending_updates"] = dict()
+                last_data = table_data.copy()
             if ws.closing:
                 break
             yield from asyncio.sleep(update_wait)
@@ -97,6 +97,23 @@ def networktables_websocket(request):
     with table_data_lock:
         connections.remove(connection)
     return ws
+
+def dict_delta(dict_a, dict_b):
+    result = dict()
+    for k in dict_b:
+        if k in dict_a:
+            if isinstance(dict_a[k], dict) and isinstance(dict_b[k], dict):
+                comp_res = dict_delta(dict_a[k], dict_b[k])
+                if len(comp_res) > 0:
+                    result[k] = comp_res
+            elif dict_a[k] != dict_b[k]:
+                result[k] = dict_b[k]
+        else:
+            result[k] = dict_b[k]
+    return result
+
+
+
 
 @asyncio.coroutine
 def networktables_websocket_listener(ws):
