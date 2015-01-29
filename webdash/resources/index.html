@@ -50,8 +50,9 @@
                           <h2>Network Tables</h2>
                           <p style="float: right;">Status: <span id="networktables-status" class="label label-danger">Disconnected</span></p>
                           <select id="networktables-select" class="selectpicker" data-style="btn-primary" onchange="networktables_set_table()">
-                            <option value="/SmartDashboard">SmartDashboard</option>
-                            <option value="/LiveWindow">LiveWindow</option>
+                            <option value="/SmartDashboard/" selected="selected">SmartDashboard</option>
+                            <option value="/LiveWindow/">LiveWindow</option>
+                            <option value="/">All</option>
                           </select>
                           <br/>
                       </div>
@@ -76,9 +77,13 @@
                   <div id="livewindow" class="panel panel-info">
                       <div class="panel-heading">
                           <h2>Live Window</h2>
+                          <p style="float: right;">Status: <span id="livewindow-status" class="label label-danger">Disabled</span></p>
+                          <br/>
                       </div>
                       <div class="panel-body">
-                          <p>INSERT DATA HERE!</p>
+                          <div id="livewindow-devices" class="livewindow-disabled">
+                            <p>Visible!</p>
+                          </div>
                       </div>
                   </div>
               </div>
@@ -108,5 +113,6 @@
     <script src="/bootstrap/bootstrap-select/bootstrap-select.min.js"></script>
     <script src="/netconsole.js"></script>
     <script src="/networktables.js"></script>
+    <script src="/livewindow.js"></script>
   </body>
 </html>

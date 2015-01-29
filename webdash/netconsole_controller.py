@@ -1,5 +1,5 @@
 import asyncio
-from aiohttp import web
+from aiohttp import web, errors as weberrors
 import socket
 import threading
 import atexit
@@ -76,9 +76,9 @@ def process_log(message):
     for websocket in websocket_connections[:]:
         try:
             websocket.send_str(message)
-        except web.WSClientDisconnectedError:
-            websocket.close()
-            websocket_connections.remove(websocket)
+        except weberrors.ClientDisconnectedError or weberrors.WSClientDisconnectedError:
+            pass
+
 
 websocket_connections = list()
 
@@ -90,9 +90,19 @@ def netconsole_websocket(request):
     wc_id = len(websocket_connections)
     websocket_connections.append(wc)
     print("NC Websocket {} Connected".format(wc_id))
-    yield from wc.wait_closed()
+    yield from netconsole_websocket_listener(wc)
     print("NC Websocket {} Disonnected".format(wc_id))
     return wc
+
+@asyncio.coroutine
+def netconsole_websocket_listener(ws):
+    while True:
+        try:
+            data = yield from ws.receive_str()
+        except Exception:
+            websocket_connections.remove(ws)
+            return
+        print(data)
 
 @asyncio.coroutine
 def netconsole_log_dump(request):

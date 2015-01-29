@@ -128,3 +128,11 @@ body {
  overflow-y: auto;
  height: 400px;
 }
+
+.livewindow-enabled{
+
+}
+
+.livewindow-disabled{
+ display: none;
+}
