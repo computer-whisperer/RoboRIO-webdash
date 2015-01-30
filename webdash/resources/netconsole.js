@@ -12,9 +12,7 @@ function start_netconsole(){
 
 function netconsole_connect(e){
     $("#netconsole-data").text("")
-    $("#netconsole-status").text("Connected")
-    $("#netconsole-status").removeClass("label-danger")
-    $("#netconsole-status").addClass("label-success")
+    setBadge("#netconsole-status", true, "Connected")
     if(!first_connect){
         netconsole_print_colored("Reconnected to Server", "green")
     }
@@ -30,9 +28,7 @@ function netconsole_close(e){
     if(connected){
         netconsole_print_colored("Lost Connection with Server", "red")
         connected = false
-        $("#netconsole-status").text("Disconnected")
-        $("#netconsole-status").removeClass("label-success")
-        $("#netconsole-status").addClass("label-danger")
+        setBadge("#netconsole-status", false, "Disconnected")
     }
     setTimeout(start_netconsole, 1000)
 }

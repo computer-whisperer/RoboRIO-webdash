@@ -12,12 +12,23 @@ ip_address = "127.0.0.1"
 
 initialized_networktables = False
 
-table_data = None
+table_data = dict()
 table_data_lock = RLock()
 root_table = None
 
 connections = list()
 tagged_tables = list()
+
+class ConnectionListener:
+    def connected(self, table):
+        table_data["~CONNECTED~"] = True
+        for con in connections:
+            con["updated_data"] = True
+
+    def disconnected(self, table):
+        table_data["~CONNECTED~"] = False
+        for con in connections:
+            con["updated_data"] = True
 
 def subtable_listener(source, key, value, isNew):
     print("subTableListener triggered! params: '{}', '{}', '{}', '{}'".format(source, key, value, isNew))
@@ -58,8 +69,9 @@ def setup_networktables(ip=ip_address):
     NetworkTable.setClientMode()
     NetworkTable.initialize()
     root_table = NetworkTable.getTable("")
+    c_listener = ConnectionListener()
+    root_table.addConnectionListener(c_listener)
     root_table.addSubTableListener(subtable_listener)
-    table_data = dict()
     initialized_networktables = True
 
 @asyncio.coroutine

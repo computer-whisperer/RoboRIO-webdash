@@ -129,6 +129,11 @@ body {
  height: 400px;
 }
 
+#livewindow-devices{
+ overflow-y: auto;
+ height: 400px;
+}
+
 .livewindow-enabled{
 
 }

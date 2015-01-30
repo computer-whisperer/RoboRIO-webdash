@@ -6,7 +6,7 @@ function start_livewindow(){
 
 function update_livewindow(){
 
-    if (networktables_connected && networktables_data["LiveWindow"]["~STATUS~"]["LW Enabled"]){
+    if (networktables_nt_connected && networktables_get_value("/LiveWindow/~STATUS~/LW Enabled")){
         enable_livewindow()
     }
     else{
@@ -15,37 +15,81 @@ function update_livewindow(){
 
     if (livewindow_enabled){
         livewindow_data = networktables_data["LiveWindow"]
-        devices = []
+        new_html = ""
         for (section in livewindow_data){
-            devices.concat(get_devices(livewindow_data[section]))
+            if (section.lastIndexOf("~", 0) == 0){
+                continue
+            }
+            new_html += render_livewindow_object(livewindow_data[section])
         }
+        $("#livewindow-devices").html(new_html)
     }
     setTimeout(update_livewindow, 500);
 }
 
-function get_devices(livewindow_object){
-    devices = []
-    for (i in livewindow_object){
-        if (i.lastIndexOf("~", 0) == 0){
-            continue;
-        }
-        if (livewindow_object[i]["~TYPE~"] == "LW Subsystem"){
-            new_devices = get_devices(livewindow_object[i])
-            devices.concat(new_devices)
-        }
-        else{
-            devices.push(livewindow_object[i])
+function render_livewindow_object(obj){
+    if (! obj.hasOwnProperty("~TYPE~")) return
+    var type = obj["~TYPE~"]
+    if (type == "LW Subsystem") return render_livewindow_subsystem(obj)
+    else if (type == "Digital Input") return render_livewindow_digitalinput(obj)
+    else return render_livewindow_generic(obj)
+}
+
+function render_livewindow_subsystem(obj){
+    var html = ""
+    for (i in obj){
+        if (i.lastIndexOf("~", 0) != 0){
+            html += render_livewindow_object(obj[i])
         }
     }
+    return html
 }
+
+var livewindow_dev_html = "\
+<div class='panel lw-dev-panel'>\
+    <div class='panel-heading'>\
+        <h3 class='panel-title'><span class='lw-dev-name'></span>   <strong>Subsystem: </strong><span class='lw-dev-subsystem'></span></h3>\
+    </div>\
+    <div class='panel-body'>\
+        <div class='lw-dev-content'></div>\
+    </div>\
+</div>\
+"
+
+function render_livewindow_generic(obj){
+    jq_obj = $(livewindow_dev_html)
+    jq_obj.addClass("panel-primary")
+    jq_obj.find(".lw-dev-name").html(obj["Name"])
+    jq_obj.find(".lw-dev-subsystem").html(obj["Subsystem"])
+    for (i in obj){
+        jq_obj.find(".lw-dev-content").append("<br/>" + i + " = " + obj[i])
+    }
+    return $("<p/>").append(jq_obj).html()
+}
+
+function render_livewindow_digitalinput(obj){
+    jq_obj = $(livewindow_dev_html)
+    jq_obj.addClass("panel-success")
+    jq_obj.find(".lw-dev-name").html(obj["Name"])
+    jq_obj.find(".lw-dev-subsystem").html(obj["subsystem"])
+    var html = "<h3>Value:  "
+    if (obj["value"]){
+        html += "<span class='label label-success'>True</span>"
+    }
+    else{
+        html += "<span class='label label-danger'>False</span>"
+    }
+    html += "</h3>"
+    jq_obj.find(".lw-dev-content").append(html)
+    return $("<p/>").append(jq_obj).html()
+}
+
 
 function enable_livewindow(){
     if (livewindow_enabled){
         return
     }
-    $("#livewindow-status").text("Enabled")
-    $("#livewindow-status").removeClass("label-danger")
-    $("#livewindow-status").addClass("label-success")
+    setBadge("#livewindow-status", true, "Enabled")
     $("#livewindow-devices").addClass("livewindow-enabled")
     $("#livewindow-devices").removeClass("livewindow-disabled")
     livewindow_enabled = true
@@ -55,9 +99,7 @@ function disable_livewindow(){
     if (!livewindow_enabled){
         return
     }
-    $("#livewindow-status").text("Disabled")
-    $("#livewindow-status").addClass("label-danger")
-    $("#livewindow-status").removeClass("label-success")
+    setBadge("#livewindow-status", false, "Disabled")
     $("#livewindow-devices").removeClass("livewindow-enabled")
     $("#livewindow-devices").addClass("livewindow-disabled")
     livewindow_enabled = false

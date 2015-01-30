@@ -1,5 +1,8 @@
 var networktables_websocket
-var networktables_connected = false
+var networktables_wd_connected = false
+var networktables_nt_connected = false
+var root_table = ""
+var networktables_data = []
 
 function start_networktables(){
     networktables_websocket = new WebSocket("ws:" + window.location.host + '/networktables')
@@ -11,10 +14,9 @@ function start_networktables(){
 }
 
 function networktables_connect(e){
-    $("#networktables-status").text("Connected")
-    $("#networktables-status").removeClass("label-danger")
-    $("#networktables-status").addClass("label-success")
-    networktables_connected = true
+    setBadge("#networktables-wd-status", true, "Connected")
+    networktables_data = []
+    networktables_wc_connected = true
 }
 
 function networktables_error(e){
@@ -22,22 +24,15 @@ function networktables_error(e){
 }
 
 function networktables_close(e){
-    if(networktables_connected){
-        networktables_connected = false
-        $("#networktables-status").text("Disconnected")
-        $("#networktables-status").removeClass("label-success")
-        $("#networktables-status").addClass("label-danger")
-    }
+    networktables_wd_connected = false
+    networktables_nt_connected = false
+    setBadge("#networktables-wd-status", false, "Disconnected")
     setTimeout(start_networktables, 1000)
 }
 
-var root_table = ""
-
-var networktables_data = []
-
 function networktables_message(e){
     obj = JSON.parse(e.data)
-    update_object(networktables_data, obj)
+    pydict_update(networktables_data, obj)
     update_networktables_ui()
 }
 
@@ -46,37 +41,38 @@ function networktables_set_table(){
     update_networktables_ui()
 }
 
-function update_object(tgt, src){
-    for (var key in src){
-        if (typeof obj[key] == "object"){
-            if (!tgt.hasOwnProperty(key)){
-                tgt[key] = []
-            }
-            update_object(tgt[key], src[key])
+function networktables_get_value(key, def){
+    if (!def){
+        def = false
+    }
+    components = key.split("/")
+    target = networktables_data
+    for (var i = 0; i < components.length; i++){
+        subkey = components[i]
+        if (subkey == ""){
+            continue
+        }
+        if (target.hasOwnProperty(subkey)){
+            target = target[subkey]
         }
         else{
-            tgt[key] = src[key]
+            return def
         }
     }
-}
-
-function flatten_object(obj){
-    var result = []
-    for (var key in obj){
-        if (typeof obj[key] == "object"){
-            var subflat = flatten_object(obj[key])
-            for (s in subflat){
-                result["/" + key + s] = subflat[s]
-            }
-        }
-        else{
-            result["/" + key] = obj[key]
-        }
-    }
-    return result
+    return target
 }
 
 function update_networktables_ui(){
+    //Update NT connection badge
+    if (networktables_get_value("/~CONNECTED~")){
+        setBadge("#networktables-nt-status", true, "Connected")
+        networktables_nt_connected = true
+    }
+    else{
+        setBadge("#networktables-nt-status", false, "Disconnected")
+        networktables_nt_connected = false
+    }
+
     //Clear UI
     $("#networktables-table tbody tr").remove()
 
