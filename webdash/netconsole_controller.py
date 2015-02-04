@@ -56,7 +56,7 @@ def netconsole_monitor():
     #main loop
     while True:
         try:
-            msg = sock_queue.get_nowait()
+            msg = str(sock_queue.get_nowait(), 'utf-8')
 
         except Empty:
             pass # no output
@@ -107,5 +107,5 @@ def netconsole_websocket_listener(ws):
 @asyncio.coroutine
 def netconsole_log_dump(request):
     print("Dumping logs to request.")
-    data = "\n".join(received_logs)
+    data = "\n".join(l["message"] for l in received_logs)
     return web.Response(body=data.encode('utf-8'))

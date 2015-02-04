@@ -32,78 +32,67 @@
       </div>
     </nav>
 
-    <div class="container-fluid">
+    <div class="container-fluid" style="margin-top: 20px;">
       <div class="row">
-        <div class="col-sm-3 col-md-2 sidebar">
-          <p class="yeti-version"></p>
-          <ul class="nav nav-sidebar">
-            <li><a class="navbar-link" href="#">Do Barrel Roll</a></li>
-            <li><a class="navbar-link" href="#">Unleash Magic</a></li>
-          </ul>
+        <div id="networktables-container" class="col-lg-6 col-md-6 col-sm-6">
+            <div id="networktables" class="panel panel-success">
+                <div class="panel-heading">
+                    <h2>Network Tables</h2>
+                    <div style="display: inline-block; float: right; margin-left: auto;">
+                      <p>WebDashboard Server: <span id="networktables-wd-status" class="label label-danger">Disconnected</span></p>
+                      <p>NetworkTables Server: <span id="networktables-nt-status" class="label label-danger">Disconnected</span></p>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <select id="networktables-select" class="selectpicker" data-style="btn-primary" onchange="networktables_set_table()">
+                          <option value="/SmartDashboard/" selected="selected">SmartDashboard</option>
+                          <option value="/LiveWindow/">LiveWindow</option>
+                          <option value="/">All</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div id="networktables-block">
+                    <table id="networktables-table" class="table table-striped">
+                        <thead>
+                          <tr>
+                              <td>Entry Name</td>
+                              <td>Entry Value</td>
+                          </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main container-fluid">
-          <div class="row">
-              <div id="networktables-container" class="col-md-6">
-                  <div id="networktables" class="panel panel-success">
-                      <div class="panel-heading">
-                          <h2>Network Tables</h2>
-                          <p style="float: right;">
-                            WebDashboard Server: <span id="networktables-wd-status" class="label label-danger">Disconnected</span><br/>
-                            NetworkTables Server: <span id="networktables-nt-status" class="label label-danger">Disconnected</span>
-                          </p>
-                          <select id="networktables-select" class="selectpicker" data-style="btn-primary" onchange="networktables_set_table()">
-                            <option value="/SmartDashboard/" selected="selected">SmartDashboard</option>
-                            <option value="/LiveWindow/">LiveWindow</option>
-                            <option value="/">All</option>
-                          </select>
-                          <br/>
-                      </div>
-                      <div class="panel-body">
-                          <div id="networktables-block">
-                          <table id="networktables-table" class="table table-striped">
-                              <thead>
-                                <tr>
-                                    <td>Entry Name</td>
-                                    <td>Entry Value</td>
-                                </tr>
-                              </thead>
-                              <tbody>
-
-                              </tbody>
-                          </table>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-              <div id="livewindow-container" class="col-md-6">
-                  <div id="livewindow" class="panel panel-info">
-                      <div class="panel-heading">
-                          <h2>Live Window</h2>
-                          <p style="float: right;">Status: <span id="livewindow-status" class="label label-danger">Disabled</span></p>
-                          <br/>
-                      </div>
-                      <div class="panel-body">
-                          <div id="livewindow-devices" class="livewindow-disabled">
-                            <p>Visible!</p>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-          </div>
-          <div class="netconsole-container col-md-12">
-              <div class="panel console-panel panel-default">
-                  <div class="panel-heading">
-                      <h2>Netconsole Output</h2>
-                      <p style="float: right;">WebDashboard Server: <span id="netconsole-status" class="label label-danger">Disconnected</span></p>
-                      <p><a href="/netconsole_dump" target="_blank">Download recorded logs.</a></p>
-                  </div>
-                  <div id="netconsole-block" class="panel-body" style="clear: right;">
-                      <p id="netconsole-data">
-                      </p>
-                  </div>
-              </div>
-          </div>
+        <div id="livewindow-container" class="col-lg-6 col-md-6 col-sm-6">
+            <div id="livewindow" class="panel panel-info">
+                <div class="panel-heading">
+                    <h2>Live Window</h2>
+                    <p style="float: right;">Status: <span id="livewindow-status" class="label label-danger">Disabled</span></p>
+                    <br/>
+                </div>
+                <div class="panel-body">
+                    <div id="livewindow-devices" class="livewindow-disabled">
+                      <p>Visible!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="netconsole-container col-md-12">
+        <div class="panel console-panel panel-default">
+            <div class="panel-heading">
+                <h2>Netconsole Output</h2>
+                <p style="float: right;">WebDashboard Server: <span id="netconsole-status" class="label label-danger">Disconnected</span></p>
+                <p><a href="/netconsole_dump" target="_blank">Download recorded logs.</a></p>
+            </div>
+            <div id="netconsole-block" class="panel-body" style="clear: right;">
+                <p id="netconsole-data">
+                </p>
+            </div>
         </div>
       </div>
     </div>

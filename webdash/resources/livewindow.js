@@ -5,12 +5,13 @@ function start_livewindow(){
 }
 
 function update_livewindow(){
-
     if (networktables_nt_connected && networktables_get_value("/LiveWindow/~STATUS~/LW Enabled")){
         enable_livewindow()
+        next_sleep = 100
     }
     else{
         disable_livewindow()
+        next_sleep = 500
     }
 
     if (livewindow_enabled){
@@ -24,7 +25,8 @@ function update_livewindow(){
         }
         $("#livewindow-devices").html(new_html)
     }
-    setTimeout(update_livewindow, 500);
+
+    setTimeout(update_livewindow, next_sleep);
 }
 
 function render_livewindow_object(obj){

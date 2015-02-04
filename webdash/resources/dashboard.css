@@ -109,6 +109,11 @@ body {
  width: 100%
 }
 
+#networktables_container, #livewindow_container{
+ width: 45%;
+ min-width: 500px;
+}
+
 #netconsole-block{
  background: black;
  color: white;
