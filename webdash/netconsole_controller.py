@@ -11,7 +11,7 @@ UDP_IN_PORT=6666
 UDP_OUT_PORT=6668
 
 received_logs = list()
-log_update_limit = 50
+log_store_limit = 50
 
 @asyncio.coroutine
 def netconsole_monitor():
@@ -73,6 +73,8 @@ def netconsole_monitor():
 def process_log(message):
     log_data = {"message": message, "timestamp": time.monotonic()}
     received_logs.append(log_data)
+    while len(received_logs) > log_store_limit:
+        received_logs.remove(received_logs[0])
     for websocket in websocket_connections[:]:
         try:
             websocket.send_str(message)

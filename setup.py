@@ -45,6 +45,7 @@ setup(
     author_email='robot.inventor@gmail.com',
     keywords='frc first robotics networktables netconsole livewindow',
     packages=[base_package],
+    include_package_data=True,
     license='BSD License',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -53,7 +54,9 @@ setup(
         'Programming Language :: Python',
         'License :: OSI Approved :: BSD License'
     ],
-    entry_points = {
-        'console_scripts': ['webdash = webdash.main:main']
+    entry_points={
+        'console_scripts': [
+            'webdash=webdash.main:main',
+        ],
     }
-    )
+)
