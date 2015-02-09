@@ -11,7 +11,7 @@ function start_netconsole(){
 }
 
 function netconsole_connect(e){
-    $("#netconsole-data").text("")
+    netconsole_clear()
     setBadge("#netconsole-status", true, "Connected")
     if(!first_connect){
         netconsole_print_colored("Reconnected to Server", "green")
@@ -44,6 +44,10 @@ function netconsole_message(e){
 function netconsole_print(msg){
     $("#netconsole-data").append(msg.replace(/(?:\r\n|\r|\n)/g, '<br />'))
     $("#netconsole-block").prop("scrollTop", $("#netconsole-block").prop("scrollHeight") - $('#netconsole-block').height())
+}
+
+function netconsole_clear(){
+    $("#netconsole-data").text("")
 }
 
 $(document).ready(function(){

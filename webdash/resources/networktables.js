@@ -73,6 +73,8 @@ function update_networktables_ui(){
         networktables_nt_connected = false
     }
 
+    $("#server_ip").text(networktables_get_value("/~SERVER_IP~"))
+
     //Clear UI
     $("#networktables-table tbody tr").remove()
 

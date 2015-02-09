@@ -21,17 +21,12 @@ tagged_tables = list()
 
 class ConnectionListener:
     def connected(self, table):
-        table_data["~CONNECTED~"] = True
-        for con in connections:
-            con["updated_data"] = True
+        set_local_value("/", "~CONNECTED~", True)
 
     def disconnected(self, table):
-        table_data["~CONNECTED~"] = False
-        for con in connections:
-            con["updated_data"] = True
+        set_local_value("/", "~CONNECTED~", False)
 
 def subtable_listener(source, key, value, isNew):
-    print("subTableListener triggered! params: '{}', '{}', '{}', '{}'".format(source, key, value, isNew))
     with table_data_lock:
         if source.containsSubTable(key):
             watch_table(value.path)
@@ -39,17 +34,24 @@ def subtable_listener(source, key, value, isNew):
             val_listener(source, key, value, isNew)
 
 def val_listener(source, key, value, isNew):
-    print("valListener triggered! params: '{}', '{}', '{}', '{}'".format(source, key, value, isNew))
+    set_local_value(source.path, key, source.getValue(key))
+
+def set_local_value(path, key, value):
+
+    # Get the nested dictionary at path
     target_ref = table_data
-    for s in source.path.split(NetworkTable.PATH_SEPARATOR):
+    for s in path.split(NetworkTable.PATH_SEPARATOR):
         if s == "":
             continue
         elif s not in target_ref:
             target_ref[s] = dict()
         target_ref = target_ref[s]
-    target_ref[key] = source.getValue(key)
-    for con in connections:
-        con["updated_data"] = True
+
+    # Save the value if it is new
+    if key not in target_ref or target_ref[key] != value:
+        target_ref[key] = value
+        for con in connections:
+            con["updated_data"] = True
 
 def watch_table(key):
     print("Watching Table " + key)
@@ -59,7 +61,6 @@ def watch_table(key):
         new_table = root_table.getTable(key)
         new_table.addSubTableListener(subtable_listener)
         new_table.addTableListener(val_listener, True)
-
 
 def setup_networktables(ip=ip_address):
     global root_table, table_data, initialized_networktables
@@ -80,9 +81,6 @@ def networktables_websocket(request):
     ws = web.WebSocketResponse()
     ws.start(request)
 
-    #Setup networktables
-    setup_networktables(ip_address)
-
     #Setup connection dict
     con_id = len(connections)
     with table_data_lock:
@@ -92,6 +90,10 @@ def networktables_websocket(request):
 
     #Start listener coroutine
     asyncio.async(networktables_websocket_listener(ws))
+
+    #Set IP status data
+    ip = request.transport.get_extra_info("sockname")[0]
+    set_local_value("", "~SERVER_IP~", ip)
 
     last_data = dict()
 
@@ -117,6 +119,10 @@ def networktables_websocket(request):
         return ws
 
 def dict_delta(dict_a, dict_b):
+    """
+    recursively compares two dictionaries, returns the dictionary of differences.
+    aka retval = dict_b - dict_a
+    """
     result = dict()
     for k in dict_b:
         if k in dict_a:

@@ -8,7 +8,7 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href="/favicon.ico"/>
 
-    <title>RoboRIO Web SmartDashboard</title>
+    <title>RoboRIO WebDashboard</title>
 
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
@@ -26,9 +26,10 @@
     <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="container-fluid">
         <div class="navbar-header">
-          <a class="navbar-brand" href="#">RoboRIO Web SmartDashboard</a>
+          <a class="navbar-brand" href="#">RoboRIO WebDashboard</a>
         </div>
-        <img src="/FIRSTvert_Reversed.gif" width="50" style="margin-left: 15px; margin-right: 15px;">
+          <img src="/FIRSTvert_Reversed.gif" width="50" style="margin-left: 15px; margin-right: 15px;">
+          <h4 style="float: right; color: #9d9d9d; text-shadow: 0 -1px 0 rgba(0,0,0,.25); margin: 15px;">WebDashboard IP Address: <span id="server_ip"></span></h4>
       </div>
     </nav>
 
@@ -87,7 +88,7 @@
             <div class="panel-heading">
                 <h2>Netconsole Output</h2>
                 <p style="float: right;">WebDashboard Server: <span id="netconsole-status" class="label label-danger">Disconnected</span></p>
-                <p><a href="/netconsole_dump" target="_blank">Download recorded logs.</a></p>
+                <p><a class="btn btn-default" href="/netconsole_dump" target="_blank">Download recorded logs.</a><button class="btn btn-default" onclick="netconsole_clear()">Clear window.</button></p>
             </div>
             <div id="netconsole-block" class="panel-body" style="clear: right;">
                 <p id="netconsole-data">
