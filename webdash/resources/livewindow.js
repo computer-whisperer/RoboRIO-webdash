@@ -33,7 +33,11 @@ function render_livewindow_object(obj){
     if (! obj.hasOwnProperty("~TYPE~")) return
     var type = obj["~TYPE~"]
     if (type == "LW Subsystem") return render_livewindow_subsystem(obj)
-    else if (type == "Digital Input") return render_livewindow_digitalinput(obj)
+    else if (type == "Digital Input") return render_livewindow_digital_input(obj)
+    else if (type == "Quadrature Encoder") return render_livewindow_encoder(obj)
+    else if (type == "Speed Controller") return render_livewindow_speed_controller(obj)
+    else if (type == "Analog Input") return render_livewindow_analog_input(obj)
+    else if (type == "Gyro") return render_livewindow_gyro(obj)
     else return render_livewindow_generic(obj)
 }
 
@@ -47,10 +51,10 @@ function render_livewindow_subsystem(obj){
     return html
 }
 
-var livewindow_dev_html = "\
+var livewindow_dev_html = " \
 <div class='panel lw-dev-panel'>\
     <div class='panel-heading'>\
-        <h3 class='panel-title'><span class='lw-dev-name'></span>   <strong>Subsystem: </strong><span class='lw-dev-subsystem'></span></h3>\
+        <h2 class='panel-title'><span class='lw-dev-name'></span></h2>\
     </div>\
     <div class='panel-body'>\
         <div class='lw-dev-content'></div>\
@@ -62,30 +66,65 @@ function render_livewindow_generic(obj){
     jq_obj = $(livewindow_dev_html)
     jq_obj.addClass("panel-primary")
     jq_obj.find(".lw-dev-name").html(obj["Name"])
-    jq_obj.find(".lw-dev-subsystem").html(obj["Subsystem"])
     for (i in obj){
         jq_obj.find(".lw-dev-content").append("<br/>" + i + " = " + obj[i])
     }
     return $("<p/>").append(jq_obj).html()
 }
 
-function render_livewindow_digitalinput(obj){
+function render_livewindow_digital_input(obj){
     jq_obj = $(livewindow_dev_html)
     jq_obj.addClass("panel-success")
     jq_obj.find(".lw-dev-name").html(obj["Name"])
-    jq_obj.find(".lw-dev-subsystem").html(obj["subsystem"])
-    var html = "<h3>Value:  "
+    var html = "<h4>Value:  "
     if (obj["value"]){
         html += "<span class='label label-success'>True</span>"
     }
     else{
         html += "<span class='label label-danger'>False</span>"
     }
-    html += "</h3>"
+    html += "</h4>"
     jq_obj.find(".lw-dev-content").append(html)
     return $("<p/>").append(jq_obj).html()
 }
 
+function render_livewindow_encoder(obj){
+    jq_obj = $(livewindow_dev_html)
+    jq_obj.addClass("panel-warning")
+    jq_obj.find(".lw-dev-name").html(obj["Name"])
+    content = jq_obj.find(".lw-dev-content")
+    content.append("<h4>Distance: " + obj["Distance"] + "</h4>")
+    content.append("<h4>Distance per Tick: " + obj["Distance per Tick"] + "</h4>")
+    content.append("<h4>Speed: " + obj["Speed"] + "</h4>")
+    return $("<p/>").append(jq_obj).html()
+}
+
+function render_livewindow_speed_controller(obj){
+    jq_obj = $(livewindow_dev_html)
+    jq_obj.addClass("panel-info")
+    jq_obj.find(".lw-dev-name").html(obj["Name"])
+    content = jq_obj.find(".lw-dev-content")
+    content.append("<h4>Value: " + obj["Value"] + "</h4>")
+    return $("<p/>").append(jq_obj).html()
+}
+
+function render_livewindow_analog_input(obj){
+    jq_obj = $(livewindow_dev_html)
+    jq_obj.addClass("panel-default")
+    jq_obj.find(".lw-dev-name").html(obj["Name"])
+    content = jq_obj.find(".lw-dev-content")
+    content.append("<h4>Value: " + obj["Value"] + "</h4>")
+    return $("<p/>").append(jq_obj).html()
+}
+
+function render_livewindow_gyro(obj){
+    jq_obj = $(livewindow_dev_html)
+    jq_obj.addClass("panel-success")
+    jq_obj.find(".lw-dev-name").html(obj["Name"])
+    content = jq_obj.find(".lw-dev-content")
+    content.append("<h4>Value: " + obj["Value"] + "</h4>")
+    return $("<p/>").append(jq_obj).html()
+}
 
 function enable_livewindow(){
     if (livewindow_enabled){

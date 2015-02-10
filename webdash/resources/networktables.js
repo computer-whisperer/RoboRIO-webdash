@@ -7,7 +7,6 @@ var networktables_data = []
 function start_networktables(){
     networktables_websocket = new WebSocket("ws:" + window.location.host + '/networktables')
     networktables_websocket.onmessage = networktables_message
-    networktables_websocket.onopen = networktables_connect
     networktables_websocket.onclose = networktables_close
     networktables_websocket.onerror = networktables_error
     networktables_set_table()
@@ -16,7 +15,7 @@ function start_networktables(){
 function networktables_connect(e){
     setBadge("#networktables-wd-status", true, "Connected")
     networktables_data = []
-    networktables_wc_connected = true
+    networktables_wd_connected = true
 }
 
 function networktables_error(e){
@@ -27,10 +26,14 @@ function networktables_close(e){
     networktables_wd_connected = false
     networktables_nt_connected = false
     setBadge("#networktables-wd-status", false, "Disconnected")
+    setBadge("#networktables-nt-status", false, "Disconnected")
+    $("#server_ip").text("Disconnected")
     setTimeout(start_networktables, 1000)
 }
 
 function networktables_message(e){
+    if (!networktables_wd_connected)
+        networktables_connect()
     obj = JSON.parse(e.data)
     pydict_update(networktables_data, obj)
     update_networktables_ui()
@@ -73,7 +76,9 @@ function update_networktables_ui(){
         networktables_nt_connected = false
     }
 
-    $("#server_ip").text(networktables_get_value("/~SERVER_IP~"))
+    if (networktables_wd_connected){
+        $("#server_ip").text(networktables_get_value("/~SERVER_IP~"))
+    }
 
     //Clear UI
     $("#networktables-table tbody tr").remove()

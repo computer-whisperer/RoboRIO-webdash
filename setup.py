@@ -37,7 +37,7 @@ with open(join(setup_dir, 'README.rst'), 'r') as readme_file:
     long_description = readme_file.read()
 
 setup(
-    name='webdash',
+    name='roborio-webdash',
     version=__version__,
     description='A web-based dashboard with several useful utilities',
     long_description=long_description,
