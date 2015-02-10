@@ -19,7 +19,7 @@ start() {
         exit 0;
     else
         echo $"Starting $SNAME ..."
-        $PROG &> /webdashout.txt &
+        $PROG &
         echo $"$SNAME started."
         exit 0;
     fi
