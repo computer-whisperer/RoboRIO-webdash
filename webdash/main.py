@@ -1,4 +1,4 @@
-#/usr/bin/python3
+# /usr/bin/python3
 import asyncio
 import sys
 from os import symlink, remove

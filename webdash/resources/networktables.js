@@ -65,6 +65,16 @@ function networktables_get_value(key, def){
     return target
 }
 
+function networktables_set_value(key, value){
+    if (networktables_wd_connected){
+        data = {}
+        data["key"] = key
+        data["value"] = value
+        strdata = JSON.stringify(data)
+        networktables_websocket.send(strdata)
+    }
+}
+
 function update_networktables_ui(){
     //Update NT connection badge
     if (networktables_get_value("/~CONNECTED~")){

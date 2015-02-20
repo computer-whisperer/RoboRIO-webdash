@@ -46,6 +46,10 @@ setup(
     keywords='frc first robotics networktables netconsole livewindow',
     packages=[base_package],
     include_package_data=True,
+    install_requires=[
+        "aiohttp",
+        "pynetworktables"
+    ],
     license='BSD License',
     classifiers=[
         'Development Status :: 5 - Production/Stable',

@@ -1,12 +1,12 @@
 from networktables import NetworkTable
 import asyncio
 import json
+import math
 from aiohttp import web, errors as weberrors
 from threading import RLock
 from copy import deepcopy
 
 import logging
-logging.basicConfig(level=logging.DEBUG)
 
 ip_address = "127.0.0.1"
 
@@ -37,6 +37,9 @@ def val_listener(source, key, value, isNew):
     set_local_value(source.path, key, source.getValue(key))
 
 def set_local_value(path, key, value):
+
+    if isinstance(value, float) and (math.isnan(value) or math.isinf(value)):
+        value = 0.0
 
     # Get the nested dictionary at path
     target_ref = table_data
@@ -104,7 +107,6 @@ def networktables_websocket(request):
                 connection["updated_data"] = False
                 updates = dict_delta(last_data, table_data)
                 string_data = json.dumps(updates)
-                print("Sending " + string_data)
                 ws.send_str(string_data)
                 last_data = deepcopy(table_data)
             if ws.closing:
@@ -144,5 +146,8 @@ def networktables_websocket_listener(ws):
             jdata = yield from ws.receive_str()
         except Exception:
             return
+        print(jdata)
         data = json.loads(jdata)
-        root_table.pushData(data["name"], data["value"])
+
+        root_table.putValue(data["key"], data["value"])
+        set_local_value("/", data["key"], data["value"])
