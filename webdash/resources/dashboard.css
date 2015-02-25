@@ -134,6 +134,10 @@ body {
  height: 400px;
 }
 
+#networktables-table{
+ table-layout: fixed;
+}
+
 #livewindow-devices{
  overflow-y: auto;
  height: 400px;

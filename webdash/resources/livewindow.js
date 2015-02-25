@@ -4,6 +4,7 @@ function start_livewindow(){
     update_livewindow()
 }
 
+
 function update_livewindow(){
     if (networktables_nt_connected && networktables_get_value("/LiveWindow/~STATUS~/LW Enabled")){
         enable_livewindow()
