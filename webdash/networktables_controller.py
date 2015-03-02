@@ -72,10 +72,8 @@ def trigger_update():
 def set_value(key, value):
     try:
         current_value = get_local_value(key)
-        print("old value: " + str(value))
         if current_value is not None:
             value = to_type(value, type(current_value))
-        print("new value: " + str(value))
         if key[0] == NetworkTable.PATH_SEPARATOR:
             key = key[1:]
 
@@ -186,7 +184,6 @@ def networktables_websocket_listener(ws):
             jdata = yield from ws.receive_str()
         except Exception:
             return
-        print(jdata)
         data = json.loads(jdata)
 
         set_value(data["key"], data["value"])

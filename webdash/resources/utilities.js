@@ -14,7 +14,7 @@ function setBadge(identifier, status, text){
 
 function pydict_update(tgt, src){
     for (var key in src){
-        if (typeof obj[key] == "object"){
+        if (typeof src[key] == "object"){
             if (!tgt.hasOwnProperty(key)){
                 tgt[key] = []
             }
